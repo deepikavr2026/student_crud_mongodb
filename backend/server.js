@@ -126,7 +126,7 @@ const server=http.createServer(async(req,res)=>{
                 return;
                 }
 
-                //Get updated student
+        //Get updated student
 
                 const student=await studentsCollection.findOne({
                     _id:new ObjectId(id),
@@ -152,7 +152,7 @@ const server=http.createServer(async(req,res)=>{
 
 
     //get student by id
-        else if(req.url.startsWith('/getStudent/') && req.method==="GET");
+        else if(req.url.startsWith('/getStudent/') && req.method==="GET"){
             try{
                 const id=req.url.split('/')[2];
                 if(!ObjectId.isValid(id)){
@@ -189,7 +189,57 @@ const server=http.createServer(async(req,res)=>{
             }))
             
         }
- 
+    }
+
+
+
+        //Delete a student
+        else if(req.url.startsWith('/deleteStudent/') && req.method==="DELETE"){
+            try{
+                const id=req.url.split('/')[2];
+                if(!ObjectId.isValid(id)){
+                    res.statusCode=400;
+                    res.end(JSON.stringify({
+                        message:"Invalid student ID"
+                    }));
+                    return;
+                }
+                const student=studentsCollection.findOne({
+                    _id:new ObjectId(id)
+                });
+                if(!student){
+                    res.statusCode=404;
+                    res.end(JSON.stringify({
+                        message:"Student Not Found"
+                    }))
+                    return;
+                }
+
+                await studentsCollection.deleteOne({
+                    _id:new ObjectId(id)
+                });
+                req.statusCode=200;
+                res.end(JSON.stringify({
+                    message:"Student details deleted successfully",
+                    student:student
+                }))
+            }catch(error){
+                console.log(error);
+                res.statusCode=500;
+                res.end(JSON.stringify({
+                    message:"Failed to delete student"
+                }))
+            }
+        }
+
+        //Invalid route
+        else{
+            res.statusCode=404;
+            res.end(JSON.stringify({
+                message:"Route Not Found"
+            }))
+        }
+    
 });
 
 
